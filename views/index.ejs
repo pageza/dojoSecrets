@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/style.css">
+    <title>Login and Registration</title>
+</head>
+<body>
+    <!-- This displays the registration errors -->
+    <% if(messages.reg) { %>
+        <% for (var x of messages.reg) { %>
+            <h3 class="error"><%= x %></h3>
+        <% } %>
+    <% } %>
+    <!-- This is the form which an User can register -->
+    <div id="register">
+        <h2>Register Here</h2>
+        <form action="/register" method="post">
+            <p><input type="email" name="email" placeholder="What is your Email?" id=""></p>
+            <p><input type="text" name="first_name" placeholder="What is your first name?" id=""></p>
+            <p><input type="text" name="last_name" placeholder="What is your last name?" id=""></p>
+            <p><input type="password" name="password" placeholder="Create a password " id=""></p>
+            <p><input type="password" name="passwordConfirm" placeholder="Confirm password" id=""></p>
+            <p><input type="date" name="birthday" placeholder="What is your birthday?" id=""></p>
+            <button type="submit">Create User</button>
+        </form>
+    </div>
+    <!-- This is the form to log in -->
+    <div id="login">
+        <form action="/login" method="post">
+            <p><input type="email" name="email" placeholder="Email" id=""></p>
+            <p><input type="password" name="password" placeholder="Password" id=""></p>
+            <button type="submit">Log In</button>
+        </form>
+    </div>
+</body>
+</html>
