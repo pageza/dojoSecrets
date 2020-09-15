@@ -16,18 +16,26 @@ const PORT = 8080
 // Connecting mongoose to the MongoDB
 mongoose.connect('mongodb://localhost/dojoSecrets', {useNewUrlParser: true, useUnifiedTopology: true})
 
+let Schema = mongoose.Schema;
+
 // Create Schema and models
 const UserSchema = new mongoose.Schema({
    email:{type: String, required: [true, 'Email is required'], match: [/^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/, "email entered is not of a valid form"]},
    first_name:{type: String, required:[true, 'A first name is required'], minlength:[2, 'First name must be at least 2 characters long']},
    last_name:{type: String, required:[true, 'A last name is required'], minlength:[2, 'Last name must be at least 2 characters long']},
    password:{type: String, required:[true, 'A password is required'], minlength: [8, 'Your password must be at least 8 characters long']},
-   birthday:{type: Date, required:[true, 'You must enter your birthdate']}
+   birthday:{type: Date, required:[true, 'You must enter your birthdate']},
+   secrets: [{type: Schema.Types.ObjectId, ref:'Secret'}]
 }, {timestamps: true})
+const SecretSchema = mongoose.Schema({
+    _user: {type: Schema.Types.ObjectId, ref: 'User'},
+    content: {type: String, required: [true, "You must enter a secret"], minlength: [5, "Your secret must be at least 5 characters long."]}
+},{timestamps: true})
 
 
 // Create Object of Models
 const User = mongoose.model('User', UserSchema)
+const Secret = mongoose.model('Secret', SecretSchema)
 
 
 // Setting the static directoy for express
@@ -93,8 +101,11 @@ app.post('/register', (req, res) => {
                     }
                     else {
                         newUser.save(err => {
-                            req.session.user_id = newUser.id;
-                            res.render('success', {user:req.session})
+                            req.session.user_id = newUser._id;
+                            req.session.first_name = newUser.first_name;
+                            req.session.email = newUser.email;
+                            req.session.user_id = newUser._id;
+                            res.redirect('/secrets')
                         });
                     }
                 });
@@ -106,7 +117,7 @@ app.post('/login', (req, res) => {
     User.findOne({email: req.body.email}, (err,user) => {
         if(user){
             bcrypt.compare(req.body.password, user.password)
-                .then(req.session.email = user.email, req.session.name = user.first_name, res.redirect('/success'))
+                .then(req.session.email = user.email, req.session.first_name = user.first_name, req.session.user_id = user._id, res.redirect('/secrets'))
                 .catch(err => {res.json(err)})
         }
         else {
@@ -119,9 +130,43 @@ app.post('/logout', (req, res) => {
     req.session.destroy()
     res.redirect('/')
 });
-app.get('/success', (req, res) => {
-    res.render('success', {user:req.session})
+app.get('/secrets', (req, res) => {
+    Secret.find({})
+        .populate('user')
+        .exec((err,secrets) => {
+            if(err){res.json(err)}
+            else {res.render('secrets', {user:req.session, secrets:secrets})}
+        })
+    
 });
-
+app.post('/secret', (req, res) => {
+    console.log(req.session);
+    let user_id = req.session.user_id;
+    User.findOne({_id: user_id}, (err,user) => {
+        let newSecret = new Secret({content: req.body.content});
+        newSecret._user = user_id;
+        newSecret.content = req.body.secret;
+        newSecret.save((err) => {
+            if (err) {
+                console.log(err);
+            }
+            else {
+                User.update({_id:user_id}, {$push: {'secrets': newSecret}},(err) => {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        res.redirect('/secrets')
+                    }
+                });
+            }
+        })
+    })
+});
+app.post('/secret/:id', (req, res) => {
+    console.log(req.params.id);
+    Secret.findByIdAndDelete({_id: req.params.id})
+        .then(deletedSecret => res.redirect('/secrets'))
+        .catch(err => res.json(err))
+});
 // Setting the app to listen on specified port
  app.listen(PORT, () => console.log("listening on port: ", PORT) );
