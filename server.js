@@ -148,7 +148,6 @@ app.get('/secrets', (req, res) => {
     
 });
 app.post('/secrets', (req, res) => {
-    console.log("hit the redirect");
     let user_id = req.session.user_id;
     User.findOne({_id: user_id}, (err,user) => {
         let newSecret = new Secret({content: req.body.content});
@@ -171,7 +170,6 @@ app.post('/secrets', (req, res) => {
     })
 });
 app.post('/secrets/:id', (req, res) => {
-    console.log(req.params.id);
     Secret.findByIdAndDelete({_id: req.params.id})
         .then(deletedSecret => res.redirect('/secrets'))
         .catch(err => res.json(err))
@@ -206,5 +204,10 @@ app.post('/secret/:id', (req,res) => {
         })
     })
 })
+app.post('/secret/:sid/comment/:cid', (req, res) => {
+    Comment.findOneAndDelete({_id:req.params.cid})
+        .then(deletedComment => res.redirect('/secret/'+req.params.sid))
+        .catch(err => res.json(err))
+});
 // Setting the app to listen on specified port
  app.listen(PORT, () => console.log("listening on port: ", PORT) );
