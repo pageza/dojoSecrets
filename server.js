@@ -129,7 +129,7 @@ app.post('/login', (req, res) => {
                 .catch(err => {res.json(err)})
         }
         else {
-            req.flash('reg', "There is no user with those credentials.")
+            req.flash('login', "There is no user with those credentials.")
             res.redirect('/')
         }
     })    

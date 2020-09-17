@@ -14,3 +14,44 @@
     color: red;
     font-style: italic;
   }
+body {
+  background-color: darkgray;
+  color: darkblue;
+}
+
+#register, #login {
+    border-style: solid;
+    border-radius: 25px;
+    padding: 20px;
+    width: auto;
+    display: inline-block;
+    border-width: 2px;
+    border-color: cadetblue;
+    color: darkblue;
+    background-color: rgb(87, 141, 172)  ;
+  }
+
+#register {
+    margin-left: 30%;
+    margin-top: 50px;
+    padding: 5%;
+  }
+
+  #login {
+    padding: 5%;
+  }
+
+#secretSubmit {
+  border-style: solid;
+  border-radius: 20px;
+  border-width: 2px;
+  padding: 10px;
+}
+
+.lists {
+  margin-top: 20px;
+  border-style: solid;
+  border-radius: 20px;
+  border-width: 2px;
+  padding: 1%;
+}

@@ -8,14 +8,15 @@
 </head>
 <body>
     <!-- This displays the registration errors -->
-    <% if(messages.reg) { %>
-        <% for (var x of messages.reg) { %>
-            <p class="error"><%= x %></p>
-        <% } %>
-    <% } %>
+    
     <!-- This is the form which an User can register -->
     <div id="register">
-        <h2>Register Here</h2>
+        <% if(messages.reg) { %>
+            <% for (var x of messages.reg) { %>
+                <p class="error"><%= x %></p>
+            <% } %>
+        <% } %>
+        <h2>Register</h2>
         <form action="/register" method="post">
             <p><input type="email" name="email" placeholder="What is your Email?" id=""></p>
             <p><input type="text" name="first_name" placeholder="What is your first name?" id=""></p>
@@ -28,6 +29,12 @@
     </div>
     <!-- This is the form to log in -->
     <div id="login">
+        <% if(messages.login) { %>
+            <% for (var x of messages.login) { %>
+                <p class="error"><%= x %></p>
+            <% } %>
+        <% } %>
+        <h2>Login</h2>
         <form action="/login" method="post">
             <p><input type="email" name="email" placeholder="Email" id=""></p>
             <p><input type="password" name="password" placeholder="Password" id=""></p>
