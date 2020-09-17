@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const flash = require('express-flash');
 const bcrypt = require('bcrypt');
+const { render } = require('ejs');
 
 // Instantiating the Express app
 const app = express();
@@ -29,13 +30,20 @@ const UserSchema = new mongoose.Schema({
 }, {timestamps: true})
 const SecretSchema = mongoose.Schema({
     _user: {type: Schema.Types.ObjectId, ref: 'User'},
-    content: {type: String, required: [true, "You must enter a secret"], minlength: [5, "Your secret must be at least 5 characters long."]}
+    content: {type: String, required: [true, "You must enter a secret"], minlength: [5, "Your secret must be at least 5 characters long."]},
+    comments: [{type: Schema.Types.ObjectId, ref:'Comment'}]
 },{timestamps: true})
+const CommentSchema = mongoose.Schema({
+    _secret: {type: Schema.Types.ObjectId, ref: 'Secret'},
+    _user: {type: Schema.Types.ObjectId, ref:'User'},
+    comment: {type: String, required: [true, "You must enter a comment"], minlength: [5, "Your comment must be at least 5 characters long."]}
+})
 
 
 // Create Object of Models
 const User = mongoose.model('User', UserSchema)
 const Secret = mongoose.model('Secret', SecretSchema)
+const Comment = mongoose.model('Comment', CommentSchema)
 
 
 // Setting the static directoy for express
@@ -139,8 +147,8 @@ app.get('/secrets', (req, res) => {
         })
     
 });
-app.post('/secret', (req, res) => {
-    console.log(req.session);
+app.post('/secrets', (req, res) => {
+    console.log("hit the redirect");
     let user_id = req.session.user_id;
     User.findOne({_id: user_id}, (err,user) => {
         let newSecret = new Secret({content: req.body.content});
@@ -162,11 +170,41 @@ app.post('/secret', (req, res) => {
         })
     })
 });
-app.post('/secret/:id', (req, res) => {
+app.post('/secrets/:id', (req, res) => {
     console.log(req.params.id);
     Secret.findByIdAndDelete({_id: req.params.id})
         .then(deletedSecret => res.redirect('/secrets'))
         .catch(err => res.json(err))
 });
+app.get('/secret/:id', (req,res) => {
+    Secret.findOne({_id: req.params.id})
+        .populate('comments')
+        .populate('user')
+        .exec((err,secret) => {
+            if(err){res.json(err)}
+            else {res.render('secret', {secret:secret, user:req.session})}
+        })
+})
+app.post('/secret/:id', (req,res) => {
+    Secret.findOne({_id:req.params.id}, (err,secret) => {
+        let newComment = new Comment({comment:req.body.comment})
+        newComment._secret = req.params.id;
+        newComment.comment = req.body.comment;
+        newComment._user = req.session.user_id;
+        newComment.save(err => {
+            if (err) {
+                console.log('first ',err);
+            } else {
+                Secret.updateOne({_id: req.params.id}, {$push: {'comments': newComment}}, err => {
+                    if (err) {
+                        console.log('second ', err);
+                    } else {
+                        return res.redirect(req.params.id)
+                    }
+                })
+            }
+        })
+    })
+})
 // Setting the app to listen on specified port
  app.listen(PORT, () => console.log("listening on port: ", PORT) );
