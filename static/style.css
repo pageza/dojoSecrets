@@ -9,3 +9,8 @@
     text-decoration: underline;
     cursor: pointer;
   }
+
+  .error {
+    color: red;
+    font-style: italic;
+  }

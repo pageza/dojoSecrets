@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/style.css">
-    <title>Login and Registration</title>
+    <title>Dojo Secrets Landing page</title>
 </head>
 <body>
     <!-- This displays the registration errors -->
     <% if(messages.reg) { %>
         <% for (var x of messages.reg) { %>
-            <h3 class="error"><%= x %></h3>
+            <p class="error"><%= x %></p>
         <% } %>
     <% } %>
     <!-- This is the form which an User can register -->

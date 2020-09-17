@@ -156,6 +156,8 @@ app.post('/secrets', (req, res) => {
         newSecret.save((err) => {
             if (err) {
                 console.log(err);
+                req.flash('submit', "Your secret must be at least 5 characters long.")
+                res.redirect('/secrets')
             }
             else {
                 User.update({_id:user_id}, {$push: {'secrets': newSecret}},(err) => {
@@ -192,6 +194,8 @@ app.post('/secret/:id', (req,res) => {
         newComment.save(err => {
             if (err) {
                 console.log('first ',err);
+                req.flash('submit', "Your comment must be 5 characters long.")
+                res.redirect(req.params.id)
             } else {
                 Secret.updateOne({_id: req.params.id}, {$push: {'comments': newComment}}, err => {
                     if (err) {
